@@ -83,14 +83,8 @@ export default function HalloweenRegistrationPage() {
       if (step === 1) {
         const result = await supabaseApi.validateSignupCode(data.code)
         
-        if (!result.isValid) {
+        if (!result.valid) {
           setError(result.message || "Kode tidak valid")
-          setLoading(false)
-          return
-        }
-        
-        if (result.isUsed) {
-          setError("Kode sudah digunakan")
           setLoading(false)
           return
         }
@@ -99,21 +93,21 @@ export default function HalloweenRegistrationPage() {
       } else if (step === 2) {
         setStep(3)
       } else if (step === 3) {
-        const result = await supabaseApi.registerPlayer({
-          name: data.name.trim(),
-          phone: data.phone,
-          signup_code: data.code,
-        })
+        const result = await supabaseApi.registerPlayer(
+          data.code,
+          data.name.trim(),
+          data.phone
+        )
 
-        if (!result.success || !result.data) {
+        if (!result.success || !result.player) {
           setError(result.message || "Gagal mendaftar")
           setLoading(false)
           return
         }
 
-        localStorage.setItem("playerId", result.data.id.toString())
-        localStorage.setItem("playerName", result.data.name)
-        localStorage.setItem("playerPhone", result.data.phone)
+        localStorage.setItem("playerId", result.player.id.toString())
+        localStorage.setItem("playerName", result.player.name)
+        localStorage.setItem("playerPhone", result.player.phone)
 
         toast({
           title: "Pendaftaran Berhasil",
@@ -149,25 +143,29 @@ export default function HalloweenRegistrationPage() {
     setRecoveryLoading(true)
 
     try {
-      const result = await supabaseApi.recoverPlayerByPhone(recoveryPhone)
+      const { data: player, error } = await supabaseApi.supabase
+        .from('players')
+        .select('*')
+        .eq('phone', recoveryPhone)
+        .single()
 
-      if (!result.success || !result.data) {
+      if (error || !player) {
         toast({
           title: "Tidak Ditemukan",
-          description: result.message || "Nomor tidak terdaftar",
+          description: "Nomor tidak terdaftar",
           variant: "destructive",
         })
         setRecoveryLoading(false)
         return
       }
 
-      localStorage.setItem("playerId", result.data.id.toString())
-      localStorage.setItem("playerName", result.data.name)
-      localStorage.setItem("playerPhone", result.data.phone)
+      localStorage.setItem("playerId", player.id.toString())
+      localStorage.setItem("playerName", player.name)
+      localStorage.setItem("playerPhone", player.phone)
 
       toast({
         title: "Progress Ditemukan",
-        description: `Selamat datang kembali, ${result.data.name}`,
+        description: `Selamat datang kembali, ${player.name}`,
       })
 
       router.push("/dashboard")
