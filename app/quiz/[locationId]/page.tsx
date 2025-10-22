@@ -1,5 +1,5 @@
 // app/quiz/[locationId]/page.tsx
-// This file handles the quiz functionality for each location in the treasure hunt
+// Updated: World-class Halloween design with spooky atmosphere
 
 "use client"
 
@@ -8,7 +8,6 @@ import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Progress } from "@/components/ui/progress"
 import { 
   ArrowLeft, 
   CheckCircle,
@@ -16,7 +15,9 @@ import {
   X,
   Trophy,
   Clock,
-  Flag
+  Brain,
+  Skull,
+  RotateCcw
 } from "lucide-react"
 import { supabaseApi, Location } from "@/lib/supabase"
 
@@ -42,19 +43,16 @@ export default function QuizPage() {
   const locationId = params.locationId as string
 
   useEffect(() => {
-    // Check if player is logged in
     const playerId = localStorage.getItem('playerId')
     if (!playerId) {
       router.push('/')
       return
     }
 
-    // Load location data and check cooldown
     loadLocationData()
     checkCooldown()
   }, [locationId, router])
 
-  // Cooldown timer effect
   useEffect(() => {
     if (cooldownTime > 0) {
       const timer = setInterval(() => {
@@ -92,7 +90,6 @@ export default function QuizPage() {
       const playerId = localStorage.getItem('playerId')
       if (!playerId) return
 
-      // Check if player has attempted this quiz recently
       const cooldownKey = `quiz_cooldown_${playerId}_${locationId}`
       const cooldownEnd = localStorage.getItem(cooldownKey)
       const attemptsKey = `quiz_attempts_${playerId}_${locationId}`
@@ -140,45 +137,37 @@ export default function QuizPage() {
         throw new Error('Player ID not found')
       }
 
-      // Call backend to handle quiz submission
       const result = await supabaseApi.submitQuizAnswer(
         parseInt(playerId),
         locationId,
-        selectedAnswer  // Send A, B, C, or D
+        selectedAnswer
       )
 
-      // Show result
       setShowResult(true)
       
       if (result.success && result.correct) {
-        // Correct answer
         setIsCorrect(true)
         setSuccess('🎉 Selamat! Anda telah menyelesaikan lokasi ini!')
         
-        // Clear local cooldown and attempts
         const cooldownKey = `quiz_cooldown_${playerId}_${locationId}`
         const attemptsKey = `quiz_attempts_${playerId}_${locationId}`
         localStorage.removeItem(cooldownKey)
         localStorage.removeItem(attemptsKey)
 
-        // Redirect after 3 seconds
         setTimeout(() => {
           router.push('/dashboard')
         }, 3000)
         
       } else if (result.success && !result.correct) {
-        // Wrong answer
         setIsCorrect(false)
         setError(result.message || '❌ Jawaban salah!')
         
-        // Update local attempts counter
         const newAttempts = attempts + 1
         setAttempts(newAttempts)
         const attemptsKey = `quiz_attempts_${playerId}_${locationId}`
         localStorage.setItem(attemptsKey, newAttempts.toString())
         
       } else {
-        // Backend error
         setError(result.message || 'Terjadi kesalahan sistem')
       }
 
@@ -188,7 +177,7 @@ export default function QuizPage() {
     } finally {
       setLoading(false)
     }
-}
+  }
 
   const resetQuiz = () => {
     setSelectedAnswer('')
@@ -203,10 +192,10 @@ export default function QuizPage() {
 
   if (!location) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-onyx-gray to-black-600 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#1a0f1f] to-[#0a0a0f] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-light">Memuat quiz...</p>
+          <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Memuat quiz...</p>
         </div>
       </div>
     )
@@ -218,32 +207,68 @@ export default function QuizPage() {
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-onyx-gray to-black-600">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#1a0f1f] to-[#0a0a0f] relative overflow-hidden">
+      {/* Animated Halloween Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Floating Pumpkins */}
+        <div className="halloween-pumpkin pumpkin-1">🎃</div>
+        <div className="halloween-pumpkin pumpkin-2">🎃</div>
+        <div className="halloween-pumpkin pumpkin-3">🎃</div>
+        
+        {/* Floating Ghosts */}
+        <div className="halloween-ghost ghost-1">👻</div>
+        <div className="halloween-ghost ghost-2">👻</div>
+        
+        {/* Spooky Fog Effect */}
+        <div className="fog fog-1"></div>
+        <div className="fog fog-2"></div>
+        <div className="fog fog-3"></div>
+        
+        {/* Floating Particles */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="halloween-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 4}s`,
+            }}
+          />
+        ))}
+        
+        {/* Spider Webs */}
+        <div className="spider-web top-left"></div>
+        <div className="spider-web top-right"></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-onyx-gray border-b border-gold/20 p-4">
+      <div className="relative z-10 bg-gradient-to-r from-[#1a0f1f] via-[#2a1a1f] to-[#1a0f1f] border-b border-orange-500/20 p-4 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
             onClick={goBack}
-            className="text-text-light hover:text-gold"
+            className="text-white hover:text-orange-400 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Kembali
           </Button>
           <div className="text-center">
-            <h1 className="text-lg font-bold text-gold">🧠 Quiz Kemerdekaan</h1>
-            <p className="text-text-muted text-sm">{location.name}</p>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 bg-clip-text text-transparent">
+              🧠 Quiz Spooky
+            </h1>
+            <p className="text-gray-400 text-sm">{location.name}</p>
           </div>
-          <div className="w-20"></div> {/* Spacer */}
+          <div className="w-20"></div>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="relative z-10 p-4 space-y-4">
         {/* Success Message */}
         {success && (
-          <Alert className="bg-green-500/10 border-green-500/30">
-            <Trophy className="h-4 w-4 text-green-400" />
-            <AlertDescription className="text-green-400">
+          <Alert className="bg-green-500/10 border-green-500/30 backdrop-blur-md animate-fade-in">
+            <Trophy className="h-5 w-5 text-green-400" />
+            <AlertDescription className="text-green-400 font-medium">
               {success}
             </AlertDescription>
           </Alert>
@@ -251,8 +276,8 @@ export default function QuizPage() {
 
         {/* Error Message */}
         {error && (
-          <Alert className="bg-red-500/10 border-red-500/30">
-            <AlertCircle className="h-4 w-4 text-red-400" />
+          <Alert className="bg-red-500/10 border-red-500/30 backdrop-blur-md animate-shake">
+            <AlertCircle className="h-5 w-5 text-red-400" />
             <AlertDescription className="text-red-400">
               {error}
             </AlertDescription>
@@ -261,20 +286,20 @@ export default function QuizPage() {
 
         {/* Cooldown Notice */}
         {cooldownTime > 0 && (
-          <Card className="bg-orange-500/10 border-orange-500/30">
-            <CardContent className="p-4 text-center">
-              <Clock className="w-12 h-12 text-orange-400 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-orange-400 mb-2">
-                Waktu Tunggu Aktif
+          <Card className="bg-gradient-to-br from-orange-900/40 to-red-950/20 border-2 border-orange-500/30 backdrop-blur-md">
+            <CardContent className="p-6 text-center">
+              <Clock className="w-16 h-16 text-orange-400 mx-auto mb-4 animate-pulse" />
+              <h3 className="text-xl font-semibold text-orange-400 mb-2">
+                ⏳ Waktu Tunggu Aktif
               </h3>
-              <p className="text-text-muted mb-3">
+              <p className="text-gray-400 mb-4">
                 Anda perlu menunggu sebelum dapat mencoba quiz lagi
               </p>
-              <div className="text-2xl font-bold text-orange-400 mb-2">
+              <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-2">
                 {formatTime(cooldownTime)}
               </div>
-              <p className="text-text-muted text-sm">
-                Silakan kunjungi lokasi lain terlebih dahulu
+              <p className="text-gray-400 text-sm">
+                Silakan kembali setelah cooldown selesai
               </p>
             </CardContent>
           </Card>
@@ -282,81 +307,110 @@ export default function QuizPage() {
 
         {/* Quiz Card */}
         {cooldownTime === 0 && (
-          <Card className="bg-onyx-gray/50 border-gold/20">
+          <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 backdrop-blur-md">
             <CardContent className="p-6">
-              {/* Question Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <Flag className="w-5 h-5 text-gold" />
-                  <span className="text-text-light font-semibold">Quiz Halloween at Supermal Karawaci</span>
+              {/* Quiz Header */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-orange-500/20 rounded-lg">
+                  <Brain className="h-8 w-8 text-orange-400" />
                 </div>
-                <div className="text-text-muted text-sm">
-                  Percobaan: {attempts}
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Pertanyaan Quiz</h3>
+                  <p className="text-sm text-gray-400">
+                    {attempts > 0 ? `Percobaan ke-${attempts + 1}` : 'Percobaan pertama'}
+                  </p>
                 </div>
               </div>
 
               {/* Question */}
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-text-light mb-4">
+              <div className="mb-6 p-4 bg-gradient-to-br from-purple-900/30 to-purple-950/20 border border-purple-500/30 rounded-lg">
+                <p className="text-white text-lg leading-relaxed">
                   {location.quiz_question}
-                </h2>
+                </p>
               </div>
 
               {/* Answer Options */}
-              {!showResult && (
-                <div className="space-y-3 mb-6">
-                  {quizOptions.map((answer) => (
+              <div className="space-y-3 mb-6">
+                {quizOptions.map((answer) => {
+                  const isSelected = selectedAnswer === answer.option
+                  const isCorrectAnswer = showResult && answer.option === location.correct_answer
+                  const isWrongSelection = showResult && isSelected && !isCorrect
+                  
+                  return (
                     <button
                       key={answer.option}
-                      onClick={() => setSelectedAnswer(answer.option)}
-                      className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-300 ${
-                        selectedAnswer === answer.option
-                          ? 'border-gold bg-gold/10 text-text-light'
-                          : 'border-text-muted/30 bg-onyx-gray/30 text-text-muted hover:border-gold/50 hover:bg-gold/5'
-                      }`}
+                      onClick={() => !showResult && setSelectedAnswer(answer.option)}
+                      disabled={showResult || loading || cooldownTime > 0}
+                      className={`w-full p-4 rounded-lg border-2 transition-all duration-300 text-left ${
+                        isCorrectAnswer
+                          ? 'bg-green-500/20 border-green-500/50 shadow-lg shadow-green-500/20'
+                          : isWrongSelection
+                          ? 'bg-red-500/20 border-red-500/50 shadow-lg shadow-red-500/20'
+                          : isSelected
+                          ? 'bg-orange-500/20 border-orange-500/50 shadow-lg shadow-orange-500/20'
+                          : 'bg-gray-900/40 border-gray-700/30 hover:border-orange-500/40 hover:bg-gray-900/60'
+                      } ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-semibold ${
-                          selectedAnswer === answer.option
-                            ? 'border-gold bg-gold text-primary'
-                            : 'border-text-muted/50 text-text-muted'
+                      <div className="flex items-center gap-3">
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                          isCorrectAnswer
+                            ? 'bg-green-500 text-white'
+                            : isWrongSelection
+                            ? 'bg-red-500 text-white'
+                            : isSelected
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-gray-800 text-gray-400'
                         }`}>
                           {answer.option}
                         </div>
-                        <span className="font-medium">{answer.label}</span>
+                        <span className={`flex-1 ${
+                          isCorrectAnswer || isWrongSelection || isSelected
+                            ? 'text-white font-medium'
+                            : 'text-gray-300'
+                        }`}>
+                          {answer.label}
+                        </span>
+                        {isCorrectAnswer && (
+                          <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0" />
+                        )}
+                        {isWrongSelection && (
+                          <X className="w-6 h-6 text-red-400 flex-shrink-0" />
+                        )}
                       </div>
                     </button>
-                  ))}
-                </div>
-              )}
+                  )
+                })}
+              </div>
 
               {/* Result Display */}
               {showResult && (
-                <div className="mb-6">
-                  <div className={`p-4 rounded-xl border-2 ${
-                    isCorrect 
-                      ? 'border-green-500/30 bg-green-500/10' 
-                      : 'border-red-500/30 bg-red-500/10'
-                  }`}>
-                    <div className="flex items-center space-x-3 mb-3">
-                      {isCorrect ? (
-                        <CheckCircle className="w-6 h-6 text-green-400" />
-                      ) : (
-                        <X className="w-6 h-6 text-red-400" />
-                      )}
-                      <span className={`font-semibold ${
-                        isCorrect ? 'text-green-400' : 'text-red-400'
-                      }`}>
-                        {isCorrect ? 'Jawaban Benar!' : 'Jawaban Salah!'}
-                      </span>
-                    </div>
-                    
-                    <div className="text-text-light">
-                      <p><strong>Jawaban Anda:</strong> {selectedAnswer}. {quizOptions.find(q => q.option === selectedAnswer)?.label}</p>
-                      {!isCorrect && (
-                        <p className="mt-2"><strong>Jawaban yang benar:</strong> {location.correct_answer}. {quizOptions.find(q => q.option === location.correct_answer)?.label}</p>
-                      )}
-                    </div>
+                <div className={`mb-6 p-4 rounded-lg border-2 backdrop-blur-sm ${
+                  isCorrect 
+                    ? 'border-green-500/30 bg-green-500/10' 
+                    : 'border-red-500/30 bg-red-500/10'
+                }`}>
+                  <div className="flex items-center space-x-3 mb-3">
+                    {isCorrect ? (
+                      <CheckCircle className="w-8 h-8 text-green-400" />
+                    ) : (
+                      <X className="w-8 h-8 text-red-400" />
+                    )}
+                    <span className={`text-xl font-semibold ${
+                      isCorrect ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {isCorrect ? '🎉 Jawaban Benar!' : '❌ Jawaban Salah!'}
+                    </span>
+                  </div>
+                  
+                  <div className="text-white space-y-2">
+                    <p>
+                      <strong>Jawaban Anda:</strong> {selectedAnswer}. {quizOptions.find(q => q.option === selectedAnswer)?.label}
+                    </p>
+                    {!isCorrect && (
+                      <p>
+                        <strong>Jawaban yang benar:</strong> {location.correct_answer}. {quizOptions.find(q => q.option === location.correct_answer)?.label}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -366,16 +420,16 @@ export default function QuizPage() {
                 <Button
                   onClick={submitAnswer}
                   disabled={!selectedAnswer || loading || cooldownTime > 0}
-                  className="w-full bg-gold hover:bg-gold/90 text-primary font-semibold py-3"
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-6 text-lg shadow-lg shadow-orange-500/30 transition-all"
                 >
                   {loading ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2"></div>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                       Memeriksa Jawaban...
                     </>
                   ) : (
                     <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
+                      <CheckCircle className="w-5 h-5 mr-2" />
                       Kirim Jawaban
                     </>
                   )}
@@ -387,8 +441,9 @@ export default function QuizPage() {
                 <Button
                   onClick={resetQuiz}
                   variant="outline"
-                  className="w-full border-gold/30 text-text-light hover:bg-gold/10"
+                  className="w-full border-orange-500/30 text-white hover:bg-orange-500/10 py-6 text-lg"
                 >
+                  <RotateCcw className="w-5 h-5 mr-2" />
                   Coba Lagi
                 </Button>
               )}
@@ -397,10 +452,13 @@ export default function QuizPage() {
         )}
 
         {/* Quiz Info */}
-        <Card className="bg-blue-500/10 border-blue-500/20">
+        <Card className="bg-blue-500/10 border-blue-500/20 backdrop-blur-md">
           <CardContent className="p-4">
-            <h4 className="text-blue-300 font-semibold text-sm mb-2">📋 Aturan Quiz:</h4>
-            <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+            <h4 className="text-blue-300 font-semibold text-sm mb-2 flex items-center gap-2">
+              <Skull className="w-4 h-4" />
+              Aturan Quiz:
+            </h4>
+            <ul className="text-gray-400 text-xs space-y-1 ml-4 list-disc">
               <li>Jawab pertanyaan tentang Halloween dengan benar</li>
               <li>Jika jawaban salah, Anda harus menunggu 3 jam sebelum mencoba lagi</li>
               <li>Setelah menjawab benar, lokasi ini akan terselesaikan</li>
@@ -410,19 +468,19 @@ export default function QuizPage() {
         </Card>
 
         {/* Progress Indicator */}
-        <Card className="bg-onyx-gray/30 border-gold/20">
+        <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 backdrop-blur-md">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-text-light font-medium">Progress Lokasi</span>
-              <span className="text-gold font-semibold">
-                Step 3/3
-              </span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-white font-medium">Progress Lokasi</span>
+              <span className="text-orange-400 font-semibold">Step 3/3</span>
             </div>
-            <Progress value={100} className="h-2" />
-            <div className="flex justify-between text-xs text-text-muted mt-2">
-              <span>✅ QR Scan</span>
-              <span>✅ Foto Selfie</span>
-              <span className={cooldownTime > 0 ? 'text-orange-400' : 'text-gold'}>
+            <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
+              <div className="h-full w-full bg-gradient-to-r from-orange-500 to-red-600 rounded-full"></div>
+            </div>
+            <div className="flex justify-between text-xs text-gray-400 mt-2">
+              <span className="text-green-400">✅ QR Scan</span>
+              <span className="text-green-400">✅ Foto Selfie</span>
+              <span className={cooldownTime > 0 ? 'text-orange-400' : 'text-orange-400'}>
                 🧠 Quiz
               </span>
             </div>
