@@ -225,7 +225,7 @@ export default function RegistrationPage() {
           <Trophy className="w-8 h-8 text-gold" />
         </div>
         <h1 className="text-3xl font-bold text-text-light mb-2">Supermal Karawaci</h1>
-        <h2 className="text-xl font-semibold text-gold mb-1">Treasure Hunt</h2>
+        <h2 className="text-xl font-semibold text-gold mb-1">Spooky Hunt</h2>
         <p className="text-text-muted text-sm">Bergabunglah dalam petualangan seru!</p>
       </div>
 
@@ -270,9 +270,9 @@ export default function RegistrationPage() {
           {step === 1 && (
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gold mb-2">Kode Treasure Hunt</h3>
+                <h3 className="text-xl font-semibold text-gold mb-2">Kode Spooky Hunt</h3>
                 <p className="text-text-muted text-sm">
-                  Kode Treasure Hunt
+                  Kode Spooky Hunt
                 </p>
                 <p className="text-text-muted text-xs mt-2">
                   Dapatkan kode dari petugas di lokasi
@@ -513,7 +513,7 @@ export default function RegistrationPage() {
       {/* Footer */}
       <div className="mt-8 text-center">
         <p className="text-text-muted text-xs">
-          🏪 Supermal Karawaci × 🇮🇩 HUT RI ke-80
+          🏪 Supermal Karawaci × Spooky Hunt | Week of the Living Deals Halloween
         </p>
       </div>
     </div>

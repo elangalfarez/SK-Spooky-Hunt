@@ -3,3 +3,10 @@
   to = "/spookyhunt"
   status = 301
   force = true
+
+[build]
+  command = "pnpm install --no-frozen-lockfile && pnpm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
