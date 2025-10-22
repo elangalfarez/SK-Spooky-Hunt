@@ -1,3 +1,6 @@
+// app/scanner/[locationId]/page.tsx
+// Updated: World-class Halloween design with spooky atmosphere
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -46,30 +49,24 @@ export default function QRScannerPage() {
   const [isInitializing, setIsInitializing] = useState(false)
   
   const locationId = params.locationId as string
+  const locationName = LOCATION_NAMES[locationId] || locationId
 
   useEffect(() => {
-    // Check if player is logged in
     const playerId = localStorage.getItem('playerId')
     if (!playerId) {
       router.push('/')
       return
     }
-
-    // Load location data
     loadLocationData()
-    
-    // Automatically request camera access when component mounts
     requestCameraAccess()
   }, [locationId, router])
 
   useEffect(() => {
-    // Cleanup scanner on unmount
     return () => {
       cleanupScanner()
     }
   }, [])
 
-  // Watch for when scanning becomes true and video element is available
   useEffect(() => {
     console.log('useEffect triggered:', { 
       isScanning, 
@@ -100,7 +97,6 @@ export default function QRScannerPage() {
     }
   }
 
-  // Clean up scanner completely
   const cleanupScanner = () => {
     if (qrScannerRef.current) {
       try {
@@ -118,7 +114,6 @@ export default function QRScannerPage() {
     if (!videoRef.current) {
       console.error('Video element not available')
       
-      // Retry up to 3 times with increasing delays
       if (retryCount < 3) {
         console.log(`Retrying in ${(retryCount + 1) * 200}ms... (attempt ${retryCount + 1}/3)`)
         setTimeout(() => {
@@ -132,7 +127,6 @@ export default function QRScannerPage() {
     }
     
     try {
-      // Clean up any existing scanner first
       cleanupScanner()
       
       console.log('Initializing QR Scanner...')
@@ -144,7 +138,7 @@ export default function QRScannerPage() {
           preferredCamera: 'environment',
           highlightScanRegion: true,
           highlightCodeOutline: true,
-          maxScansPerSecond: 5, // Limit scan frequency
+          maxScansPerSecond: 5,
         }
       )
       
@@ -166,7 +160,6 @@ export default function QRScannerPage() {
     try {
       console.log('Requesting camera access...')
       
-      // First try to get user media to trigger permission prompt
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: "environment",
@@ -176,14 +169,8 @@ export default function QRScannerPage() {
       })
       
       console.log('Camera access granted')
-      
-      // Stop the stream immediately as QrScanner will handle it
       stream.getTracks().forEach(track => track.stop())
-      
       setCameraPermission("granted")
-      
-      // Don't initialize scanner here - let useEffect handle it
-      // when video element becomes available
       
     } catch (error) {
       console.error('Camera access error:', error)
@@ -192,24 +179,20 @@ export default function QRScannerPage() {
     }
   }
 
- const toggleFlash = async () => {
-  const scanner = qrScannerRef.current;
-  // basic null/type guards
-  if (!scanner || typeof scanner.hasFlash !== "function") return;
+  const toggleFlash = async () => {
+    const scanner = qrScannerRef.current;
+    if (!scanner || typeof scanner.hasFlash !== "function") return;
 
-  try {
-    // WAIT for the boolean result instead of checking the Promise object
-    const has = await scanner.hasFlash();
-    if (!has) return; // device doesn't have flash
+    try {
+      const has = await scanner.hasFlash();
+      if (!has) return;
 
-    // toggle and flip UI state
-    await scanner.toggleFlash();
-    setFlashOn(prev => !prev);
-  } catch (err) {
-    console.error("toggleFlash error:", err);
+      await scanner.toggleFlash();
+      setFlashOn(prev => !prev);
+    } catch (err) {
+      console.error("toggleFlash error:", err);
+    }
   }
-};
-
 
   const stopScanning = () => {
     console.log('Stopping scanner...')
@@ -221,34 +204,27 @@ export default function QRScannerPage() {
   const startScanning = async () => {
     console.log('Starting scanner...')
     setIsScanning(true)
-    setError('') // Clear any existing errors
-    
-    // Don't call initializeQrScanner here - let useEffect handle it
-    // when the video element becomes available
+    setError('')
   }
 
   const handleQRDetected = (code: string) => {
     console.log('QR Code detected:', code)
     console.log('Current location:', locationId)
     
-    // Stop scanning immediately to prevent multiple detections
     setIsScanning(false)
     if (qrScannerRef.current) {
       qrScannerRef.current.stop()
     }
     
-    // Map QR codes to location IDs (implementing location-specific validation)
     const locationQRCodes = {
-      'main_lobby': ['TREASURE_HUNT_MAIN_LOBBY_2025', 'MERDEKA_MAIN_LOBBY'],
-      'south_lobby': ['TREASUREHUNT_SOUTH_LOBBY_2025', 'MERDEKA_SOUTH_LOBBY'],
-      'east_dome': ['TREASUREHUNT_EAST_DOME_2025', 'MERDEKA_EAST_DOME'],
-      'u_walk': ['TREASUREHUNT_U_WALK_2025', 'MERDEKA_U_WALK']
+      'main_lobby': ['SPOOKYHUNT_MAIN_LOBBY_2025', 'SERAM_MAIN_LOBBY'],
+      'south_lobby': ['SPOOKYHUNT_SOUTH_LOBBY_2025', 'SERAM_SOUTH_LOBBY'],
+      'east_dome': ['SPOOKYHUNT_EAST_DOME_2025', 'SERAM_EAST_DOME'],
+      'u_walk': ['SPOOKYHUNT_U_WALK_2025', 'SERAM_U_WALK']
     }
     
-    // Get valid codes for current location
     const validCodesForLocation = locationQRCodes[locationId as keyof typeof locationQRCodes] || []
     
-    // Check if scanned code matches current location
     const isValidForLocation = validCodesForLocation.some(validCode => 
       code.toUpperCase().includes(validCode.toUpperCase())
     )
@@ -261,12 +237,10 @@ export default function QRScannerPage() {
         description: "Melanjutkan ke tahap foto selfie",
       })
       
-      // Proceed to photo capture
       setTimeout(() => {
         router.push(`/photo/${locationId}`)
       }, 1500)
     } else {
-      // Check if it's a valid QR code but wrong location
       const allValidCodes = Object.values(locationQRCodes).flat()
       const isValidQRButWrongLocation = allValidCodes.some(validCode => 
         code.toUpperCase().includes(validCode.toUpperCase())
@@ -279,83 +253,107 @@ export default function QRScannerPage() {
       }
       
       toast({
-        title: "QR Code tidak valid",
-        description: isValidQRButWrongLocation 
-          ? "QR Code ini untuk lokasi lain" 
-          : "Pastikan Anda berada di lokasi yang benar",
+        title: "QR Code Tidak Valid",
+        description: error,
         variant: "destructive"
       })
       
-      // Reset after 3 seconds
       setTimeout(() => {
         setError('')
-        startScanning()
+        setIsScanning(true)
       }, 3000)
     }
   }
 
   const handleManualSubmit = () => {
-    if (manualCode.length < 6) {
-      setError('Kode tidak lengkap. Masukkan kode QR yang lengkap')
-      return
-    }
-    
-    handleQRDetected(manualCode.toUpperCase())
+    if (manualCode.length < 6) return
+    handleQRDetected(manualCode)
   }
-
-  const goBack = () => {
-    cleanupScanner()
-    router.push('/dashboard')
-  }
-
-  const locationName = location?.name || LOCATION_NAMES[locationId] || "Unknown Location"
 
   if (!location) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-onyx-gray to-black-600 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#1a0f1f] to-[#0a0a0f] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-light">Memuat lokasi...</p>
+          <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Memuat lokasi...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-onyx-gray to-black-600">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#1a0f1f] to-[#0a0a0f] relative overflow-hidden">
+      {/* Animated Halloween Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Floating Pumpkins */}
+        <div className="halloween-pumpkin pumpkin-1">🎃</div>
+        <div className="halloween-pumpkin pumpkin-2">🎃</div>
+        <div className="halloween-pumpkin pumpkin-3">🎃</div>
+        
+        {/* Floating Ghosts */}
+        <div className="halloween-ghost ghost-1">👻</div>
+        <div className="halloween-ghost ghost-2">👻</div>
+        
+        {/* Spooky Fog Effect */}
+        <div className="fog fog-1"></div>
+        <div className="fog fog-2"></div>
+        <div className="fog fog-3"></div>
+        
+        {/* Floating Particles */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="halloween-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 4}s`,
+            }}
+          />
+        ))}
+        
+        {/* Spider Webs */}
+        <div className="spider-web top-left"></div>
+        <div className="spider-web top-right"></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-onyx-gray border-b border-gold/20 p-4">
+      <div className="relative z-10 bg-gradient-to-r from-[#1a0f1f] via-[#2a1a1f] to-[#1a0f1f] border-b border-orange-500/20 p-4 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
-            onClick={goBack}
-            className="text-text-light hover:text-gold"
+            onClick={() => router.push('/dashboard')}
+            className="text-white hover:text-orange-400 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Kembali
           </Button>
           <div className="text-center">
-            <h1 className="text-lg font-bold text-gold">📱 Scan QR Code</h1>
-            <p className="text-text-muted text-sm">{locationName}</p>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 bg-clip-text text-transparent">
+              📱 Scan QR Code
+            </h1>
+            <p className="text-gray-400 text-sm">{locationName}</p>
           </div>
-          <div className="w-20"></div> {/* Spacer */}
+          <div className="w-20"></div>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* Location Info */}
-        <Card className="bg-onyx-gray/50 border-gold/20 backdrop-blur-sm">
+      <div className="relative z-10 p-4 space-y-4">
+        {/* Location Info Card */}
+        <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 backdrop-blur-md">
           <CardContent className="p-4">
             <div className="flex items-center gap-3 mb-3">
-              <QrCode className="h-6 w-6 text-gold" />
+              <div className="p-2 bg-orange-500/20 rounded-lg">
+                <QrCode className="h-6 w-6 text-orange-400" />
+              </div>
               <div>
-                <h3 className="font-semibold text-text-light">{locationName}</h3>
-                <p className="text-sm text-text-muted">
+                <h3 className="font-semibold text-white">{locationName}</h3>
+                <p className="text-sm text-gray-400">
                   Scan QR code di lokasi ini
                 </p>
               </div>
             </div>
-            <Badge className="bg-gold/20 text-gold border-gold/30">
+            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
               Langkah 1 dari 3
             </Badge>
           </CardContent>
@@ -363,9 +361,9 @@ export default function QRScannerPage() {
 
         {/* Success Message */}
         {success && (
-          <Alert className="bg-green-500/10 border-green-500/30">
-            <CheckCircle className="h-4 w-4 text-green-400" />
-            <AlertDescription className="text-green-400">
+          <Alert className="bg-green-500/10 border-green-500/30 backdrop-blur-md animate-fade-in">
+            <CheckCircle className="h-5 w-5 text-green-400" />
+            <AlertDescription className="text-green-400 font-medium">
               {success}
             </AlertDescription>
           </Alert>
@@ -373,8 +371,8 @@ export default function QRScannerPage() {
 
         {/* Error Message */}
         {error && (
-          <Alert className="bg-red-500/10 border-red-500/30">
-            <AlertCircle className="h-4 w-4 text-red-400" />
+          <Alert className="bg-red-500/10 border-red-500/30 backdrop-blur-md animate-shake">
+            <AlertCircle className="h-5 w-5 text-red-400" />
             <AlertDescription className="text-red-400">
               {error}
             </AlertDescription>
@@ -383,11 +381,11 @@ export default function QRScannerPage() {
 
         {/* Camera Scanner */}
         {cameraPermission === "granted" && isScanning && (
-          <Card className="bg-onyx-gray/50 border-gold/20 overflow-hidden">
+          <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 overflow-hidden backdrop-blur-md">
             <CardContent className="p-0">
               {/* Camera Viewfinder */}
               <div className="relative h-80 bg-black overflow-hidden">
-                {/* Video element for camera feed */}
+                {/* Video element */}
                 <video
                   ref={videoRef}
                   className="absolute inset-0 w-full h-full object-cover"
@@ -396,28 +394,28 @@ export default function QRScannerPage() {
                   autoPlay
                 />
                 
-                {/* Loading overlay when initializing */}
+                {/* Loading overlay */}
                 {isInitializing && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
                     <div className="text-center">
-                      <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-2"></div>
+                      <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-3"></div>
                       <p className="text-white text-sm">Memulai kamera...</p>
                     </div>
                   </div>
                 )}
                 
-                {/* QR Code Detection Frame Overlay */}
+                {/* QR Detection Frame */}
                 {!isInitializing && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="relative w-48 h-48">
-                      {/* Corner borders */}
-                      <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-gold rounded-tl-lg"></div>
-                      <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-gold rounded-tr-lg"></div>
-                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-gold rounded-bl-lg"></div>
-                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-gold rounded-br-lg"></div>
+                      {/* Corner borders with glow */}
+                      <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-orange-500 rounded-tl-lg shadow-lg shadow-orange-500/50"></div>
+                      <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-orange-500 rounded-tr-lg shadow-lg shadow-orange-500/50"></div>
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-orange-500 rounded-bl-lg shadow-lg shadow-orange-500/50"></div>
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-orange-500 rounded-br-lg shadow-lg shadow-orange-500/50"></div>
                       
-                      {/* Scanning line animation */}
-                      <div className="absolute inset-x-4 top-1/2 h-0.5 bg-gold animate-pulse"></div>
+                      {/* Scanning line */}
+                      <div className="absolute inset-x-4 top-1/2 h-1 bg-orange-500 animate-pulse shadow-lg shadow-orange-500/50"></div>
                     </div>
                   </div>
                 )}
@@ -425,29 +423,29 @@ export default function QRScannerPage() {
                 {/* Instructions overlay */}
                 {!isInitializing && (
                   <div className="absolute bottom-4 left-4 right-4 text-center">
-                    <p className="text-white text-sm bg-black/50 px-3 py-1 rounded-full">
-                      Arahkan kamera ke QR code {locationName}
+                    <p className="text-white text-sm bg-black/70 px-4 py-2 rounded-full backdrop-blur-sm">
+                      🎃 Arahkan ke QR code {locationName}
                     </p>
                   </div>
                 )}
               </div>
 
               {/* Camera Controls */}
-              <div className="p-4 border-t border-gold/20">
+              <div className="p-4 border-t border-orange-500/20 bg-gray-900/40 backdrop-blur-sm">
                 <div className="flex justify-center gap-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={toggleFlash}
-                    className="bg-black/50 border-gold/30 text-text-light hover:bg-gold/10"
+                    className="bg-gray-900/50 border-orange-500/30 text-white hover:bg-orange-500/20 transition-all"
                     disabled={isInitializing}
                   >
-                    <Flashlight className={`h-5 w-5 ${flashOn ? 'text-gold' : ''}`} />
+                    <Flashlight className={`h-5 w-5 ${flashOn ? 'text-orange-400' : ''}`} />
                   </Button>
                   <Button
                     variant="outline"
                     onClick={stopScanning}
-                    className="bg-black/50 border-gold/30 text-text-light hover:bg-gold/10"
+                    className="bg-gray-900/50 border-orange-500/30 text-white hover:bg-orange-500/20 transition-all"
                     disabled={isInitializing}
                   >
                     <Type className="h-5 w-5 mr-2" />
@@ -461,14 +459,16 @@ export default function QRScannerPage() {
 
         {/* Manual Input */}
         {(!isScanning || cameraPermission === "denied") && (
-          <Card className="bg-onyx-gray/50 border-gold/20">
+          <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 backdrop-blur-md">
             <CardContent className="p-6">
               <div className="text-center mb-6">
-                <Type className="h-12 w-12 text-gold mx-auto mb-3" />
-                <h3 className="font-semibold text-text-light mb-2">
+                <div className="inline-block p-4 bg-orange-500/20 rounded-full mb-4">
+                  <Type className="h-12 w-12 text-orange-400" />
+                </div>
+                <h3 className="font-semibold text-white mb-2">
                   Input Manual
                 </h3>
-                <p className="text-sm text-text-muted">
+                <p className="text-sm text-gray-400">
                   Masukkan kode QR secara manual jika kamera tidak tersedia
                 </p>
               </div>
@@ -479,7 +479,7 @@ export default function QRScannerPage() {
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value)}
                     placeholder="Masukkan kode QR"
-                    className="text-center text-lg font-mono tracking-wider bg-primary/50 border-gold/30 text-text-light placeholder:text-text-muted focus:border-gold"
+                    className="text-center text-lg font-mono tracking-wider bg-gray-900/50 border-orange-500/30 text-white placeholder:text-gray-500 focus:border-orange-500"
                     autoFocus
                   />
                 </div>
@@ -489,7 +489,7 @@ export default function QRScannerPage() {
                     <Button
                       variant="outline"
                       onClick={startScanning}
-                      className="flex-1 border-gold/30 text-text-light hover:bg-gold/10"
+                      className="flex-1 border-orange-500/30 text-white hover:bg-orange-500/10 transition-all"
                     >
                       <Camera className="h-5 w-5 mr-2" />
                       Kembali ke Kamera
@@ -497,7 +497,7 @@ export default function QRScannerPage() {
                   )}
                   <Button
                     onClick={handleManualSubmit}
-                    className="flex-1 bg-gold hover:bg-gold/90 text-primary"
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold transition-all"
                     disabled={manualCode.length < 6}
                   >
                     <Check className="h-5 w-5 mr-2" />
@@ -511,19 +511,19 @@ export default function QRScannerPage() {
 
         {/* Camera Permission Denied */}
         {cameraPermission === "denied" && (
-          <Card className="bg-red-500/10 border-red-500/30">
+          <Card className="bg-red-500/10 border-red-500/30 backdrop-blur-md">
             <CardContent className="p-6 text-center">
               <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-red-400 mb-2">
                 Akses Kamera Ditolak
               </h3>
-              <p className="text-text-muted mb-4">
+              <p className="text-gray-400 mb-4">
                 Untuk menggunakan scanner QR, izinkan akses kamera pada pengaturan browser
               </p>
               <div className="space-y-2">
                 <Button 
                   onClick={requestCameraAccess}
-                  className="bg-gold hover:bg-gold/90 text-primary w-full"
+                  className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white w-full"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Coba Lagi
@@ -534,10 +534,10 @@ export default function QRScannerPage() {
         )}
 
         {/* Instructions */}
-        <Card className="bg-blue-500/10 border-blue-500/20">
+        <Card className="bg-blue-500/10 border-blue-500/20 backdrop-blur-md">
           <CardContent className="p-4">
             <h4 className="text-blue-300 font-semibold text-sm mb-2">📋 Petunjuk Scan QR:</h4>
-            <ol className="text-text-muted text-xs space-y-1 ml-4 list-decimal">
+            <ol className="text-gray-400 text-xs space-y-1 ml-4 list-decimal">
               <li>Cari QR code khusus untuk {locationName}</li>
               <li>Arahkan kamera ke QR code hingga terdeteksi</li>
               <li>Pastikan pencahayaan cukup untuk scan yang optimal</li>
