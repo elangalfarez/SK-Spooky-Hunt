@@ -516,7 +516,7 @@ export default function HalloweenRegistrationPage() {
         {/* Event Info with Pumpkin */}
         <div className="mt-8 text-center text-xs text-text-muted flex items-center gap-2 backdrop-blur-sm bg-gray-900/30 px-4 py-2 rounded-full border border-orange-500/20">
           <span>🎃</span>
-          <span>Supermal Karawaci × 🎃 HUT RI ke-80</span>
+          <span>Supermal Karawaci × 🎃 Week of the Living Deals Halloween</span>
           <span>🎃</span>
         </div>
       </div>
