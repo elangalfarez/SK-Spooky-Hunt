@@ -209,52 +209,26 @@ export default function HalloweenDashboardPage() {
       </div>
 
       {/* Header with Spooky Glow */}
-      <div className="relative z-10 bg-gradient-to-r from-purple-950/60 via-orange-950/60 to-purple-950/60 backdrop-blur-xl border-b-2 border-orange-500/30 p-6 shadow-2xl shadow-orange-500/20">
-        <div className="text-center space-y-3">
-          <div className="flex justify-center mb-2">
+      <div className="relative z-10 bg-gradient-to-r from-purple-950/60 via-orange-950/60 to-purple-950/60 backdrop-blur-xl border-b-2 border-orange-500/30 shadow-2xl shadow-orange-500/20">
+        <div className="text-center space-y-4 py-8">
+          <div className="flex justify-center mb-3">
             <div className="relative">
               <div className="absolute inset-0 bg-orange-500/30 blur-xl rounded-full animate-pulse-glow"></div>
-              <Trophy className="w-12 h-12 text-orange-500 relative drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]" />
+              <Trophy className="w-16 h-16 text-orange-500 relative drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(251,146,60,0.5)] animate-text-glow">
+          
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(251,146,60,0.5)] animate-text-glow px-4 leading-tight">
             Halloween Spooky Hunt
           </h1>
-          <p className="text-text-muted text-sm">
-            Welcome, <span className="text-orange-400 font-semibold">{playerData.name}</span>
-          </p>
           
-          {/* Circular Progress */}
-          <div className="relative w-24 h-24 mx-auto mt-4">
-            <svg className="transform -rotate-90 w-24 h-24">
-              <circle
-                cx="48"
-                cy="48"
-                r="40"
-                stroke="currentColor"
-                strokeWidth="6"
-                fill="transparent"
-                className="text-gray-800"
-              />
-              <circle
-                cx="48"
-                cy="48"
-                r="40"
-                stroke="currentColor"
-                strokeWidth="6"
-                fill="transparent"
-                strokeDasharray={`${2 * Math.PI * 40}`}
-                strokeDashoffset={`${2 * Math.PI * 40 * (1 - progressPercentage / 100)}`}
-                className="text-orange-500 transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]"
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-400">{progressPercentage}%</div>
-                <div className="text-xs text-text-muted">Progress</div>
-              </div>
-            </div>
+          <div className="space-y-1">
+            <p className="text-text-muted text-base md:text-lg">
+              Welcome,
+            </p>
+            <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-300 to-red-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(251,146,60,0.4)]">
+              {playerData.name}
+            </p>
           </div>
         </div>
       </div>
