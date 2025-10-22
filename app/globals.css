@@ -1,3 +1,6 @@
+/* app/globals.css */
+/* Created: Halloween-themed animations and effects with world-class micro-interactions */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,11 +27,6 @@
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
     --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
   }
 
   .dark {
@@ -51,11 +49,6 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 }
 
@@ -79,24 +72,324 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4af37;
+  background: #ea580c;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b8941f;
+  background: #fb923c;
+}
+
+/* ============================================
+   HALLOWEEN ANIMATIONS & EFFECTS
+   ============================================ */
+
+/* Floating Pumpkins */
+.halloween-pumpkin {
+  position: absolute;
+  font-size: 2.5rem;
+  opacity: 0.4;
+  filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.5));
+  animation: float 6s ease-in-out infinite;
+}
+
+.pumpkin-1 {
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+  animation-duration: 8s;
+}
+
+.pumpkin-2 {
+  top: 60%;
+  right: 8%;
+  animation-delay: 2s;
+  animation-duration: 7s;
+}
+
+.pumpkin-3 {
+  bottom: 15%;
+  left: 10%;
+  animation-delay: 4s;
+  animation-duration: 9s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-40px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-20px) rotate(-5deg);
+  }
+}
+
+/* Floating Ghosts */
+.halloween-ghost {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.3;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+  animation: ghost-float 10s ease-in-out infinite;
+}
+
+.ghost-1 {
+  top: 20%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.ghost-2 {
+  bottom: 30%;
+  right: 20%;
+  animation-delay: 5s;
+}
+
+@keyframes ghost-float {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translate(-30px, -30px) rotate(5deg);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(-60px, -50px) rotate(0deg);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translate(-30px, -30px) rotate(-5deg);
+    opacity: 0.4;
+  }
+}
+
+/* Spooky Fog Effect */
+.fog {
+  position: absolute;
+  height: 150px;
+  width: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 92, 246, 0.1) 25%,
+    rgba(251, 146, 60, 0.1) 50%,
+    rgba(139, 92, 246, 0.1) 75%,
+    transparent 100%
+  );
+  filter: blur(30px);
+  animation: fog-move 20s linear infinite;
+}
+
+.fog-1 {
+  bottom: 0;
+  animation-delay: 0s;
+}
+
+.fog-2 {
+  bottom: 100px;
+  animation-delay: 7s;
+  animation-duration: 25s;
+}
+
+.fog-3 {
+  top: 0;
+  animation-delay: 14s;
+  animation-duration: 30s;
+}
+
+@keyframes fog-move {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Floating Particles */
+.halloween-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.8) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: particle-rise 10s linear infinite;
+}
+
+@keyframes particle-rise {
+  0% {
+    bottom: -10%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 110%;
+    opacity: 0;
+  }
+}
+
+/* Spider Web Decorations */
+.spider-web {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  opacity: 0.15;
+  background-image: 
+    linear-gradient(to right, rgba(156, 163, 175, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(156, 163, 175, 0.3) 1px, transparent 1px),
+    radial-gradient(circle at center, transparent 30%, rgba(156, 163, 175, 0.2) 30%, rgba(156, 163, 175, 0.2) 31%, transparent 31%);
+  background-size: 20px 20px, 20px 20px, 100% 100%;
+  filter: blur(0.5px);
+}
+
+.top-left {
+  top: 0;
+  left: 0;
+  transform: rotate(-45deg);
+}
+
+.top-right {
+  top: 0;
+  right: 0;
+  transform: rotate(45deg);
+}
+
+/* Animated Border Glow */
+@keyframes border-glow {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-border-glow {
+  animation: border-glow 3s linear infinite;
+}
+
+/* Pulsing Glow Effect */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Text Glow Animation */
+@keyframes text-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 10px rgba(251, 146, 60, 0.5),
+      0 0 20px rgba(251, 146, 60, 0.3),
+      0 0 30px rgba(251, 146, 60, 0.2);
+  }
+  50% {
+    text-shadow: 
+      0 0 20px rgba(251, 146, 60, 0.8),
+      0 0 30px rgba(251, 146, 60, 0.6),
+      0 0 40px rgba(251, 146, 60, 0.4);
+  }
+}
+
+.animate-text-glow {
+  animation: text-glow 2s ease-in-out infinite;
+}
+
+/* Fade In Animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+/* Subtle Bounce */
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Shake Animation for Errors */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .halloween-pumpkin,
+  .halloween-ghost,
+  .halloween-particle,
+  .fog {
+    animation: none !important;
+  }
 }
 
 /* Glass morphism effect */
 .glass {
   background: rgba(42, 47, 58, 0.25);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(251, 146, 60, 0.2);
 }
 
 /* Gold glow effect */
 .gold-glow {
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 0 20px rgba(251, 146, 60, 0.3);
 }
 
 /* Pulse animation for available locations */
@@ -136,6 +429,65 @@
 @media (max-width: 640px) {
   html {
     font-size: 14px;
+  }
+  
+  .halloween-pumpkin {
+    font-size: 1.8rem;
+  }
+  
+  .halloween-ghost {
+    font-size: 1.5rem;
+  }
+}
+
+/* Prevent zoom on input focus for iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  select,
+  textarea,
+  input[type="text"],
+  input[type="password"],
+  input[type="datetime"],
+  input[type="datetime-local"],
+  input[type="date"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"],
+  input[type="number"],
+  input[type="email"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="color"] {
+    font-size: 16px;
+  }
+}
+
+/* Hardware acceleration for smooth animations */
+.halloween-pumpkin,
+.halloween-ghost,
+.halloween-particle,
+.fog {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Touch target sizing for mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
