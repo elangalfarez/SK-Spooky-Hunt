@@ -1,3 +1,6 @@
+// app/photo/[locationId]/page.tsx
+// Updated: World-class Halloween design with spooky atmosphere
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -25,15 +28,14 @@ export default function PhotoCapturePage() {
   const [location, setLocation] = useState<Location | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
-  const [cameraFacing, setCameraFacing] = useState<'user' | 'environment'>('user') // Front camera for selfie
+  const [cameraFacing, setCameraFacing] = useState<'user' | 'environment'>('user')
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'pending'>('pending')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [uploading, setUploading] = useState(false)
   const [isInitializing, setIsInitializing] = useState(false)
-  const [isSwitchingCamera, setIsSwitchingCamera] = useState(false) // New state to prevent flash
+  const [isSwitchingCamera, setIsSwitchingCamera] = useState(false)
   
-  // Debug stream state changes
   useEffect(() => {
     console.log('📹 Stream state changed:', !!stream, stream ? 'ACTIVE' : 'NULL')
   }, [stream])
@@ -41,20 +43,15 @@ export default function PhotoCapturePage() {
   const locationId = params.locationId as string
 
   useEffect(() => {
-    // Check if player is logged in
     const playerId = localStorage.getItem('playerId')
     if (!playerId) {
       router.push('/')
       return
     }
 
-    // Load location data
     loadLocationData()
-    
-    // Auto-request camera permission since user likely came from QR scanner
     checkAndRequestCameraPermission()
     
-    // Also try to force initialization after a delay if permission check fails
     setTimeout(() => {
       if (cameraPermission === 'pending' && !stream) {
         console.log('Forcing camera initialization attempt...')
@@ -64,7 +61,6 @@ export default function PhotoCapturePage() {
     
   }, [locationId, router])
 
-  // Watch for when camera permission is granted and video element is available
   useEffect(() => {
     console.log('Photo capture useEffect triggered:', { 
       cameraPermission, 
@@ -75,29 +71,19 @@ export default function PhotoCapturePage() {
       isSwitchingCamera
     })
     
-    if (cameraPermission === 'granted' && videoRef.current && !stream && !capturedPhoto && !isSwitchingCamera) {
-      console.log('🎥 Conditions met for camera initialization, starting in 300ms...')
-      setIsInitializing(true)
-      
-      // Add a small delay to ensure video element is fully rendered in DOM
-      setTimeout(() => {
-        if (videoRef.current) {
-          console.log('🎥 Video element still available, initializing camera now')
-          initializeCamera()
-        } else {
-          console.error('❌ Video element disappeared during delay')
-          setIsInitializing(false)
-        }
-      }, 300)
+    if (cameraPermission === 'granted' && !stream && !capturedPhoto && videoRef.current && !isInitializing && !isSwitchingCamera) {
+      console.log('Conditions met, initializing camera...')
+      initializeCamera()
     }
-  }, [cameraPermission, stream, capturedPhoto, isSwitchingCamera])
+  }, [cameraPermission, stream, capturedPhoto, isInitializing, isSwitchingCamera])
 
   useEffect(() => {
-    // Cleanup on unmount
     return () => {
-      stopCamera()
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop())
+      }
     }
-  }, [stream])
+  }, [])
 
   const loadLocationData = async () => {
     try {
@@ -117,57 +103,32 @@ export default function PhotoCapturePage() {
 
   const checkAndRequestCameraPermission = async () => {
     try {
-      // Try to directly get camera stream to test if permission exists
-      console.log('Checking camera permission...')
+      const result = await navigator.permissions.query({ name: 'camera' as PermissionName })
       
-      const testStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: cameraFacing,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        } 
-      })
-      
-      // If we get here, permission is granted
-      console.log('Camera permission already granted, stopping test stream')
-      testStream.getTracks().forEach(track => track.stop())
-      
-      setCameraPermission('granted')
-      
+      if (result.state === 'granted') {
+        setCameraPermission('granted')
+      } else if (result.state === 'denied') {
+        setCameraPermission('denied')
+      } else {
+        requestCameraPermission()
+      }
     } catch (error) {
-      console.log('Camera permission not granted or not available:', error)
-      setCameraPermission('pending')
+      console.log('Permission API not supported, requesting directly')
+      requestCameraPermission()
     }
   }
 
-  const initializeCamera = async (retryCount = 0) => {
-    console.log('initializeCamera called, retry count:', retryCount)
-    
-    if (!videoRef.current) {
-      console.error('Video element not available for photo capture')
-      
-      // Retry up to 5 times with increasing delays
-      if (retryCount < 5) {
-        console.log(`Retrying camera init in ${(retryCount + 1) * 300}ms... (attempt ${retryCount + 1}/5)`)
-        setTimeout(() => {
-          initializeCamera(retryCount + 1)
-        }, (retryCount + 1) * 300)
-      } else {
-        setError('Tidak dapat mengakses kamera. Silakan refresh halaman.')
-        setIsInitializing(false)
-        setIsSwitchingCamera(false) // Reset switching state on error
-      }
+  const initializeCamera = async () => {
+    if (isInitializing || isSwitchingCamera) {
+      console.log('Already initializing or switching, skipping...')
       return
     }
-
+    
+    setIsInitializing(true)
+    setError('')
+    
     try {
-      console.log('Initializing camera with facing:', cameraFacing)
-      console.log('Video element ready state:', videoRef.current.readyState)
-      
-      // Stop any existing stream first
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop())
-      }
+      console.log(`📷 Initializing camera with facing mode: ${cameraFacing}`)
       
       const newStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
@@ -177,63 +138,25 @@ export default function PhotoCapturePage() {
         } 
       })
       
-      console.log('Camera stream obtained successfully')
-      
-      // Double-check video element still exists
-      if (!videoRef.current) {
-        console.error('Video element disappeared during stream creation')
-        newStream.getTracks().forEach(track => track.stop())
-        setIsInitializing(false)
-        setIsSwitchingCamera(false)
-        return
-      }
-      
-      setStream(newStream)
+      console.log('✅ Camera stream obtained')
       setCameraPermission('granted')
+      setStream(newStream)
       
-      // Attach stream to video element
-      videoRef.current.srcObject = newStream
-      
-      // Force the video to load the new source
-      videoRef.current.load()
-      
-      // Wait for video to be ready before playing
-      const handleLoadedMetadata = () => {
-        console.log('Video metadata loaded, starting playback')
-        if (videoRef.current) {
-          videoRef.current.play().then(() => {
-            console.log('Video playback started successfully')
-            setIsInitializing(false)
-            setIsSwitchingCamera(false) // Reset switching state on success
-          }).catch((playError) => {
-            console.error('Video play error:', playError)
-            setIsInitializing(false)
-            setIsSwitchingCamera(false)
-          })
+      if (videoRef.current) {
+        videoRef.current.srcObject = newStream
+        videoRef.current.onloadedmetadata = () => {
+          console.log('✅ Video metadata loaded, starting playback')
+          videoRef.current?.play()
+          setIsInitializing(false)
         }
-      }
-      
-      const handleError = (error: Event) => {
-        console.error('Video element error:', error)
-        setError('Gagal memulai kamera. Coba lagi.')
+      } else {
         setIsInitializing(false)
-        setIsSwitchingCamera(false)
       }
-      
-      // Remove any existing event listeners
-      videoRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      videoRef.current.removeEventListener('error', handleError)
-      
-      // Add event listeners
-      videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true })
-      videoRef.current.addEventListener('error', handleError, { once: true })
-      
     } catch (error) {
-      console.error('Camera initialization error:', error)
+      console.error('❌ Camera initialization error:', error)
       setCameraPermission('denied')
       setIsInitializing(false)
-      setIsSwitchingCamera(false)
-      setError('Akses kamera diperlukan untuk mengambil foto selfie.')
+      setError('Tidak dapat mengakses kamera. Pastikan izin kamera diaktifkan.')
     }
   }
 
@@ -268,19 +191,15 @@ export default function PhotoCapturePage() {
     }
   }
 
-  // FIXED: Set switching state BEFORE clearing stream to prevent flash
   const switchCamera = async () => {
     console.log('🔄 Switching camera - setting states first...')
     
-    // CRUCIAL: Set loading states BEFORE clearing stream
     setIsSwitchingCamera(true)
     setIsInitializing(true)
-    setError('') // Clear any previous errors
+    setError('')
     
-    // Small delay to ensure state updates are applied
     await new Promise(resolve => setTimeout(resolve, 10))
     
-    // Stop current stream AFTER setting loading states
     if (stream) {
       console.log('🛑 Stopping current stream...')
       stream.getTracks().forEach(track => track.stop())
@@ -309,14 +228,14 @@ export default function PhotoCapturePage() {
           console.log('✅ Camera switch complete')
           videoRef.current?.play()
           setIsInitializing(false)
-          setIsSwitchingCamera(false) // Reset switching state
+          setIsSwitchingCamera(false)
         }
       }
     } catch (error) {
       console.error('❌ Camera switch error:', error)
       setError('Gagal mengganti kamera')
       setIsInitializing(false)
-      setIsSwitchingCamera(false) // Reset switching state on error
+      setIsSwitchingCamera(false)
     }
   }
 
@@ -329,14 +248,11 @@ export default function PhotoCapturePage() {
     
     if (!context) return
 
-    // Set canvas size to video size
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
 
-    // Draw video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-    // Convert to base64 image
     const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8)
     setCapturedPhoto(photoDataUrl)
   }
@@ -346,7 +262,6 @@ export default function PhotoCapturePage() {
     setError('')
     setSuccess('')
     
-    // Restart camera if needed
     if (cameraPermission === 'granted' && !stream) {
       initializeCamera()
     }
@@ -364,13 +279,10 @@ export default function PhotoCapturePage() {
         throw new Error('Player ID not found')
       }
 
-      // In a real implementation, you'd upload to Supabase Storage
-      // For now, we'll store the base64 data URL
       const photoUrl = capturedPhoto
 
       setSuccess('Foto berhasil disimpan! 📸')
       
-      // Proceed to quiz
       setTimeout(() => {
         router.push(`/quiz/${locationId}`)
       }, 1500)
@@ -395,48 +307,83 @@ export default function PhotoCapturePage() {
     router.push(`/scanner/${locationId}`)
   }
 
-  // FIXED: Updated condition to include switching state
   const showCameraNotActive = !stream && !isInitializing && !isSwitchingCamera && cameraPermission === 'granted'
   const showLoadingState = isInitializing || isSwitchingCamera
 
   if (!location) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-onyx-gray to-black-600 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#1a0f1f] to-[#0a0a0f] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-light">Memuat lokasi...</p>
+          <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Memuat lokasi...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-onyx-gray to-black-600">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#1a0f1f] to-[#0a0a0f] relative overflow-hidden">
+      {/* Animated Halloween Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Floating Pumpkins */}
+        <div className="halloween-pumpkin pumpkin-1">🎃</div>
+        <div className="halloween-pumpkin pumpkin-2">🎃</div>
+        <div className="halloween-pumpkin pumpkin-3">🎃</div>
+        
+        {/* Floating Ghosts */}
+        <div className="halloween-ghost ghost-1">👻</div>
+        <div className="halloween-ghost ghost-2">👻</div>
+        
+        {/* Spooky Fog Effect */}
+        <div className="fog fog-1"></div>
+        <div className="fog fog-2"></div>
+        <div className="fog fog-3"></div>
+        
+        {/* Floating Particles */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="halloween-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 4}s`,
+            }}
+          />
+        ))}
+        
+        {/* Spider Webs */}
+        <div className="spider-web top-left"></div>
+        <div className="spider-web top-right"></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-onyx-gray border-b border-gold/20 p-4">
+      <div className="relative z-10 bg-gradient-to-r from-[#1a0f1f] via-[#2a1a1f] to-[#1a0f1f] border-b border-orange-500/20 p-4 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
             onClick={goBack}
-            className="text-text-light hover:text-gold"
+            className="text-white hover:text-orange-400 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Kembali
           </Button>
           <div className="text-center">
-            <h1 className="text-lg font-bold text-gold">📸 Foto Selfie</h1>
-            <p className="text-text-muted text-sm">{location.name}</p>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 bg-clip-text text-transparent">
+              📸 Foto Selfie
+            </h1>
+            <p className="text-gray-400 text-sm">{location.name}</p>
           </div>
-          <div className="w-20"></div> {/* Spacer */}
+          <div className="w-20"></div>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="relative z-10 p-4 space-y-4">
         {/* Success Message */}
         {success && (
-          <Alert className="bg-green-500/10 border-green-500/30">
-            <CheckCircle className="h-4 w-4 text-green-400" />
-            <AlertDescription className="text-green-400">
+          <Alert className="bg-green-500/10 border-green-500/30 backdrop-blur-md animate-fade-in">
+            <CheckCircle className="h-5 w-5 text-green-400" />
+            <AlertDescription className="text-green-400 font-medium">
               {success}
             </AlertDescription>
           </Alert>
@@ -444,201 +391,185 @@ export default function PhotoCapturePage() {
 
         {/* Error Message */}
         {error && (
-          <Alert className="bg-red-500/10 border-red-500/30">
-            <AlertCircle className="h-4 w-4 text-red-400" />
+          <Alert className="bg-red-500/10 border-red-500/30 backdrop-blur-md animate-shake">
+            <AlertCircle className="h-5 w-5 text-red-400" />
             <AlertDescription className="text-red-400">
               {error}
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Camera Permission Request */}
-        {cameraPermission === 'pending' && (
-          <Card className="bg-onyx-gray/50 border-gold/20">
-            <CardContent className="p-6 text-center">
-              <Camera className="w-16 h-16 text-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-text-light mb-2">
-                Ambil Foto Selfie
-              </h3>
-              <p className="text-text-muted mb-4">
-                Ambil foto selfie dengan dekorasi kemerdekaan/tempat menemukan treasure hunt di {location.name}
-              </p>
-              <Button 
-                onClick={requestCameraPermission}
-                className="bg-gold hover:bg-gold/90 text-primary font-semibold"
-                disabled={showLoadingState}
-              >
-                {showLoadingState ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Memulai Kamera...
-                  </>
-                ) : (
-                  <>
-                    <Camera className="w-4 h-4 mr-2" />
-                    Buka Kamera
-                  </>
+        {/* Camera Preview or Captured Photo */}
+        {!capturedPhoto ? (
+          <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 overflow-hidden backdrop-blur-md">
+            <CardContent className="p-0">
+              {/* Camera Viewfinder */}
+              <div className="relative h-96 bg-black overflow-hidden">
+                {/* Video element */}
+                <video
+                  ref={videoRef}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  muted
+                  playsInline
+                  autoPlay
+                />
+                
+                {/* Hidden canvas for photo capture */}
+                <canvas ref={canvasRef} className="hidden" />
+                
+                {/* Loading overlay */}
+                {showLoadingState && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                    <div className="text-center">
+                      <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-3"></div>
+                      <p className="text-white text-sm">
+                        {isSwitchingCamera ? 'Mengganti kamera...' : 'Memulai kamera...'}
+                      </p>
+                    </div>
+                  </div>
                 )}
-              </Button>
+                
+                {/* Camera not active message */}
+                {showCameraNotActive && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                    <div className="text-center px-4">
+                      <Camera className="w-16 h-16 text-orange-400 mx-auto mb-4" />
+                      <p className="text-white mb-4">Kamera tidak aktif</p>
+                      <Button 
+                        onClick={initializeCamera}
+                        className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
+                      >
+                        Aktifkan Kamera
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Camera frame overlay */}
+                {stream && !showLoadingState && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="relative w-64 h-64">
+                      {/* Rounded frame corners with glow */}
+                      <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-orange-500 rounded-tl-2xl shadow-lg shadow-orange-500/50"></div>
+                      <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-orange-500 rounded-tr-2xl shadow-lg shadow-orange-500/50"></div>
+                      <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-orange-500 rounded-bl-2xl shadow-lg shadow-orange-500/50"></div>
+                      <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-orange-500 rounded-br-2xl shadow-lg shadow-orange-500/50"></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Instructions overlay */}
+                {stream && !showLoadingState && (
+                  <div className="absolute bottom-4 left-4 right-4 text-center">
+                    <p className="text-white text-sm bg-black/70 px-4 py-2 rounded-full backdrop-blur-sm">
+                      🎃 Pastikan wajah Anda terlihat jelas
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Camera Controls */}
+              <div className="p-4 border-t border-orange-500/20 bg-gray-900/40 backdrop-blur-sm">
+                <div className="flex justify-center items-center gap-4">
+                  {/* Switch Camera */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={switchCamera}
+                    disabled={showLoadingState || !stream}
+                    className="bg-gray-900/50 border-orange-500/30 text-white hover:bg-orange-500/20 transition-all"
+                  >
+                    <SwitchCamera className="h-5 w-5" />
+                  </Button>
+
+                  {/* Capture Button */}
+                  <Button
+                    size="lg"
+                    onClick={capturePhoto}
+                    disabled={!stream || showLoadingState}
+                    className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold px-8 py-6 rounded-full shadow-lg shadow-orange-500/50"
+                  >
+                    <Camera className="h-6 w-6 mr-2" />
+                    Ambil Foto
+                  </Button>
+
+                  {/* Spacer for symmetry */}
+                  <div className="w-10"></div>
+                </div>
+              </div>
             </CardContent>
           </Card>
-        )}
-
-        {/* Camera View or Captured Photo */}
-        {cameraPermission === 'granted' && (
-          <Card className="bg-onyx-gray/50 border-gold/20 overflow-hidden">
+        ) : (
+          /* Photo Preview */
+          <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 overflow-hidden backdrop-blur-md">
             <CardContent className="p-0">
-              {!capturedPhoto ? (
-                // Live Camera View
-                <div className="relative">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-80 object-cover bg-black"
-                    playsInline
-                    muted
-                    autoPlay
-                  />
-                  <canvas
-                    ref={canvasRef}
-                    className="hidden"
-                  />
-                  
-                  {/* FIXED: Loading overlay when initializing OR switching */}
-                  {showLoadingState && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-2"></div>
-                        <p className="text-white text-sm">
-                          {isSwitchingCamera ? 'Mengganti kamera...' : 'Memulai kamera...'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* FIXED: Show manual start button only when truly needed (no flash) */}
-                  {showCameraNotActive && (
-                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-                      <div className="text-center">
-                        <Camera className="w-12 h-12 text-gold mx-auto mb-4" />
-                        <p className="text-white text-sm mb-4">Kamera belum aktif</p>
-                        <div className="space-y-2">
-                          <Button
-                            onClick={() => {
-                              console.log('🎥 Manual camera activation requested')
-                              setIsInitializing(true)
-                              initializeCamera()
-                            }}
-                            className="bg-gold hover:bg-gold/90 text-primary"
-                          >
-                            <Camera className="w-4 h-4 mr-2" />
-                            Aktifkan Kamera
-                          </Button>
-                          <p className="text-white text-xs">
-                            Atau gunakan tombol ganti kamera di bawah
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Camera Controls - Always show for fallback */}
-                  {!showLoadingState && (
-                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={switchCamera}
-                        className="bg-black/50 border-white/30 text-white hover:bg-black/70"
-                        disabled={showLoadingState}
-                      >
-                        <SwitchCamera className="w-4 h-4" />
-                      </Button>
-                      
-                      {stream && (
-                        <Button
-                          size="lg"
-                          onClick={capturePhoto}
-                          className="bg-gold hover:bg-gold/90 text-primary w-16 h-16 rounded-full"
-                          disabled={showLoadingState}
-                        >
-                          <Camera className="w-6 h-6" />
-                        </Button>
-                      )}
-                      
-                      <div className="w-10"></div> {/* Spacer for symmetry */}
-                    </div>
-                  )}
-
-                  {/* Overlay Guide */}
-                  {!showLoadingState && stream && (
-                    <div className="absolute top-4 left-4 right-4">
-                      <div className="bg-black/50 rounded-lg p-3 text-center">
-                        <p className="text-white text-sm">
-                          🎯 Pastikan dekorasi kemerdekaan terlihat di belakang Anda
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                // Captured Photo Preview
-                <div className="relative">
-                  <img 
-                    src={capturedPhoto} 
-                    alt="Captured selfie"
-                    className="w-full h-80 object-cover"
-                  />
-                  
-                  {/* Photo Controls */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
-                    <Button
-                      variant="outline"
-                      onClick={retakePhoto}
-                      className="bg-black/50 border-white/30 text-white hover:bg-black/70"
-                    >
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Ambil Ulang
-                    </Button>
-                    
-                    <Button
-                      onClick={submitPhoto}
-                      disabled={uploading}
-                      className="bg-gold hover:bg-gold/90 text-primary"
-                    >
-                      {uploading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Menyimpan...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Lanjutkan ke Quiz
-                        </>
-                      )}
-                    </Button>
+              <div className="relative h-96 bg-black">
+                <img 
+                  src={capturedPhoto} 
+                  alt="Captured selfie" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                
+                {/* Preview frame */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="relative w-64 h-64">
+                    <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-green-500 rounded-tl-2xl shadow-lg shadow-green-500/50"></div>
+                    <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-green-500 rounded-tr-2xl shadow-lg shadow-green-500/50"></div>
+                    <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-green-500 rounded-bl-2xl shadow-lg shadow-green-500/50"></div>
+                    <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-green-500 rounded-br-2xl shadow-lg shadow-green-500/50"></div>
                   </div>
                 </div>
-              )}
+              </div>
+
+              {/* Photo Action Buttons */}
+              <div className="p-4 border-t border-orange-500/20 bg-gray-900/40 backdrop-blur-sm">
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={retakePhoto}
+                    className="flex-1 border-orange-500/30 text-white hover:bg-orange-500/10 transition-all"
+                  >
+                    <RotateCcw className="h-5 w-5 mr-2" />
+                    Ambil Ulang
+                  </Button>
+                  <Button
+                    onClick={submitPhoto}
+                    disabled={uploading}
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold transition-all"
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Menyimpan...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-5 w-5 mr-2" />
+                        Lanjutkan
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
 
         {/* Camera Permission Denied */}
         {cameraPermission === 'denied' && (
-          <Card className="bg-red-500/10 border-red-500/30">
+          <Card className="bg-red-500/10 border-red-500/30 backdrop-blur-md">
             <CardContent className="p-6 text-center">
               <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-red-400 mb-2">
                 Akses Kamera Ditolak
               </h3>
-              <p className="text-text-muted mb-4">
-                Silakan izinkan akses kamera di pengaturan browser untuk mengambil foto selfie.
+              <p className="text-gray-400 mb-4">
+                Foto selfie diperlukan untuk melanjutkan. Izinkan akses kamera di pengaturan browser
               </p>
               <div className="space-y-2">
                 <Button 
                   onClick={() => window.location.reload()}
-                  className="bg-gold hover:bg-gold/90 text-primary w-full"
+                  className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white w-full"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Coba Lagi
@@ -646,7 +577,7 @@ export default function PhotoCapturePage() {
                 <Button 
                   variant="outline"
                   onClick={() => router.push(`/quiz/${locationId}`)}
-                  className="border-gold/30 text-text-light hover:bg-gold/10 w-full"
+                  className="border-orange-500/30 text-white hover:bg-orange-500/10 w-full"
                 >
                   Lewati Foto (Lanjut ke Quiz)
                 </Button>
@@ -656,15 +587,33 @@ export default function PhotoCapturePage() {
         )}
 
         {/* Photo Requirements */}
-        <Card className="bg-blue-500/10 border-blue-500/20">
+        <Card className="bg-blue-500/10 border-blue-500/20 backdrop-blur-md">
           <CardContent className="p-4">
             <h4 className="text-blue-300 font-semibold text-sm mb-2">📋 Syarat Foto Selfie:</h4>
-            <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+            <ul className="text-gray-400 text-xs space-y-1 ml-4 list-disc">
               <li>Wajah Anda harus terlihat jelas</li>
-              <li>Dekorasi kemerdekaan harus tampak di latar belakang</li>
+              <li>Dekorasi Halloween harus tampak di latar belakang</li>
               <li>Foto harus diambil di lokasi {location.name}</li>
               <li>Pastikan pencahayaan cukup untuk foto yang jelas</li>
             </ul>
+          </CardContent>
+        </Card>
+
+        {/* Progress Indicator */}
+        <Card className="bg-gradient-to-br from-gray-900/60 to-gray-950/40 border-2 border-orange-500/30 backdrop-blur-md">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-white font-medium">Progress Lokasi</span>
+              <span className="text-orange-400 font-semibold">Step 2/3</span>
+            </div>
+            <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
+              <div className="h-full w-2/3 bg-gradient-to-r from-orange-500 to-red-600 rounded-full"></div>
+            </div>
+            <div className="flex justify-between text-xs text-gray-400 mt-2">
+              <span className="text-green-400">✅ QR Scan</span>
+              <span className="text-orange-400">📸 Foto Selfie</span>
+              <span className="text-gray-500">🧠 Quiz</span>
+            </div>
           </CardContent>
         </Card>
       </div>
