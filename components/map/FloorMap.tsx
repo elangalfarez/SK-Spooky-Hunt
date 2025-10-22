@@ -371,7 +371,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-primary/80 backdrop-blur-lg border border-gold/20 rounded-xl p-6 text-center max-w-sm">
                 <MapPin className="w-12 h-12 text-text-muted mx-auto mb-4" />
-                <p className="text-text-light font-medium">Belum ada treasure hunt di lantai {selectedFloor}</p>
+                <p className="text-text-light font-medium">Belum ada spooky hunt di lantai {selectedFloor}</p>
                 <p className="text-text-muted text-sm mt-2">Pilih lantai lain untuk melihat lokasi yang tersedia</p>
               </div>
             </div>
@@ -426,7 +426,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
         </p>
         <div className="flex items-center space-x-2 mt-1">
           <p className="text-xs text-text-muted">
-            {floorLocations.length} lokasi treasure hunt
+            {floorLocations.length} lokasi spooky hunt
           </p>
           {floorLocations.some(l => l.status === 'available') && (
             <div className="w-2 h-2 bg-gold rounded-full animate-ping"></div>

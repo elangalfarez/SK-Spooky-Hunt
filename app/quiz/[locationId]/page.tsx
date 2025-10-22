@@ -288,7 +288,7 @@ export default function QuizPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <Flag className="w-5 h-5 text-gold" />
-                  <span className="text-text-light font-semibold">Quiz Kemerdekaan Indonesia</span>
+                  <span className="text-text-light font-semibold">Quiz Halloween at Supermal Karawaci</span>
                 </div>
                 <div className="text-text-muted text-sm">
                   Percobaan: {attempts}
@@ -401,10 +401,10 @@ export default function QuizPage() {
           <CardContent className="p-4">
             <h4 className="text-blue-300 font-semibold text-sm mb-2">📋 Aturan Quiz:</h4>
             <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
-              <li>Jawab pertanyaan tentang kemerdekaan Indonesia dengan benar</li>
+              <li>Jawab pertanyaan tentang Halloween dengan benar</li>
               <li>Jika jawaban salah, Anda harus menunggu 3 jam sebelum mencoba lagi</li>
               <li>Setelah menjawab benar, lokasi ini akan terselesaikan</li>
-              <li>Lanjutkan ke lokasi berikutnya untuk melengkapi treasure hunt</li>
+              <li>Lanjutkan ke lokasi berikutnya untuk melengkapi spooky hunt</li>
             </ul>
           </CardContent>
         </Card>

@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Treasure Hunt - Supermal Karawaci",
-  description: "Progressive Web App untuk treasure hunt kemerdekaan di Supermal Karawaci",
+  title: "Spooky Hunt - Supermal Karawaci",
+  description: "Progressive Web App untuk spooky hunt Halloween di Supermal Karawaci",
   manifest: "/manifest.json",
   themeColor: "#D4AF37",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",

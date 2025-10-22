@@ -197,7 +197,7 @@ export default function DashboardPage() {
       
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-onyx-gray border-b border-gold/20 p-4 text-center">
-        <h1 className="text-xl font-bold text-gold">🏆 Dashboard</h1>
+        <h1 className="text-xl font-bold text-gold">Halloween Spooky Hunt</h1>
         <p className="text-text-muted text-sm">Welcome, {playerData.name}</p>
         <div className="mt-2">
           <div className="text-gold font-bold text-lg">{progressPercentage}%</div>
@@ -325,19 +325,19 @@ export default function DashboardPage() {
                   <div className="w-6 h-6 bg-gold/20 text-gold rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                     3
                   </div>
-                  <p>Ambil foto selfie dengan dekorasi kemerdekaan</p>
+                  <p>Ambil foto selfie tempat menemukan QR tersembunyi</p>
                 </div>
                 <div className="flex items-start space-x-3">
                   <div className="w-6 h-6 bg-gold/20 text-gold rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                     4
                   </div>
-                  <p>Jawab kuis tentang kemerdekaan Indonesia</p>
+                  <p>Jawab kuis tentang halloween</p>
                 </div>
                 <div className="flex items-start space-x-3">
                   <div className="w-6 h-6 bg-gold/20 text-gold rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                     5
                   </div>
-                  <p>Selesaikan semua lokasi untuk mendapatkan hadiah 0.1g emas!</p>
+                  <p>Selesaikan semua lokasi untuk mendapatkan hadiah Rp 250k cash voucher!</p>
                 </div>
               </div>
             )}

@@ -115,8 +115,8 @@ export default function ProgressPage() {
         unlockedAt: completedCount >= totalLocations ? progressData[totalLocations - 1]?.completed_at : undefined,
       },
       {
-        id: "independence_champion",
-        title: "Juara Kemerdekaan",
+        id: "halloween_champion",
+        title: "Juara Halloween",
         description: "Selesaikan semua tantangan",
         icon: "🏆",
         unlocked: completedCount >= totalLocations,
@@ -148,12 +148,12 @@ export default function ProgressPage() {
 
   const shareProgress = async () => {
     const progressPercent = calculateOverallProgress()
-    const text = `🏆 Saya telah menyelesaikan ${progressPercent}% Treasure Hunt Supermal Karawaci! ${progress.length}/${locations.length} lokasi selesai. Ikut main juga yuk! #TreasureHuntSupermal #Kemerdekaan2025`
+    const text = `🏆 Saya telah menyelesaikan ${progressPercent}% Spooky Hunt Supermal Karawaci! ${progress.length}/${locations.length} lokasi selesai. Ikut main juga yuk! #SpookyHuntSupermalKarawaci`
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Progress Treasure Hunt Supermal Karawaci",
+          title: "Progress Spooky Hunt Supermal Karawaci",
           text: text,
           url: window.location.origin,
         })

@@ -130,7 +130,7 @@ export default function EnhancedMapPage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-gold mx-auto mb-4 animate-spin" />
-            <p className="text-text-light font-medium">Memuat peta treasure hunt...</p>
+            <p className="text-text-light font-medium">Memuat peta spooky hunt...</p>
             <p className="text-text-muted text-sm mt-2">Harap tunggu sebentar</p>
           </div>
         </div>

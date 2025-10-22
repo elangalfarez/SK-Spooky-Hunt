@@ -1,7 +1,7 @@
 {
-  "name": "Treasure Hunt Supermal Karawaci",
-  "short_name": "TreasureHunt",
-  "description": "Progressive Web App untuk treasure hunt kemerdekaan di Supermal Karawaci",
+  "name": "Spooky Hunt Supermal Karawaci",
+  "short_name": "SpookyHunt",
+  "description": "Progressive Web App untuk spooky hunt halloween di Supermal Karawaci",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121421",
