@@ -409,6 +409,20 @@
   animation: gold-pulse 2s ease-in-out infinite;
 }
 
+/* Glow pulse for available cards */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(251, 146, 60, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(251, 146, 60, 0.6), 0 0 30px rgba(251, 146, 60, 0.4);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
 /* Custom line clamp utility */
 .line-clamp-2 {
   display: -webkit-box;
@@ -491,24 +505,47 @@
   }
 }
 
-/* Prevent zoom on input focus for iOS */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  select,
-  textarea,
-  input[type="text"],
-  input[type="password"],
-  input[type="datetime"],
-  input[type="datetime-local"],
-  input[type="date"],
-  input[type="month"],
-  input[type="time"],
-  input[type="week"],
-  input[type="number"],
-  input[type="email"],
-  input[type="url"],
-  input[type="search"],
-  input[type="tel"],
-  input[type="color"] {
-    font-size: 16px;
+/* ============================================
+   PROGRESS BAR ANIMATIONS
+   ============================================ */
+
+/* Shimmer effect for completed segments */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Sparkle animation */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 0.8s ease-out forwards;
+}
+
+/* Segment complete animation */
+@keyframes segment-complete {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
