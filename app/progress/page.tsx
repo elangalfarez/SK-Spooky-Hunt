@@ -467,7 +467,7 @@ export default function ProgressPage() {
                 Kunjungi customer service VIP counter di main lobby untuk mengklaim hadiah 0.1g emas Anda!
               </p>
               <Badge className="bg-gold/20 text-gold border-gold/30 text-sm">
-                💰 Hadiah: 0.1g Logam Mulia
+                💰 Hadiah: Rp 250k Voucher Supermal Karawaci
               </Badge>
             </CardContent>
           </Card>
@@ -479,8 +479,8 @@ export default function ProgressPage() {
                 Informasi Hadiah
               </h4>
               <p className="text-text-muted text-xs">
-                Selesaikan semua {totalLocations} lokasi untuk mendapat kesempatan memenangkan 0.1g emas! 
-                Hadiah terbatas untuk 20-35 orang pertama.
+                Selesaikan semua {totalLocations} lokasi untuk mendapat kesempatan memenangkan Rp 250k cash voucher! 
+                Hadiah terbatas untuk 40 orang pertama.
               </p>
             </CardContent>
           </Card>
